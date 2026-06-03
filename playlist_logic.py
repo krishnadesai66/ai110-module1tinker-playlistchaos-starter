@@ -16,7 +16,7 @@ def normalize_title(title: str) -> str:
     """Normalize a song title for comparisons."""
     if not isinstance(title, str):
         return ""
-    return title.strip()
+    return title.strip().lower()
 
 
 def normalize_artist(artist: str) -> str:
@@ -88,8 +88,13 @@ def build_playlists(songs: List[Song], profile: Dict[str, object]) -> PlaylistMa
         "Mixed": [],
     }
 
+    seen: set = set()
     for song in songs:
         normalized = normalize_song(song)
+        key = (normalized["title"], normalized["artist"])
+        if key in seen:
+            continue
+        seen.add(key)
         mood = classify_song(normalized, profile)
         normalized["mood"] = mood
         playlists[mood].append(normalized)
@@ -168,7 +173,7 @@ def search_songs(
 
     for song in songs:
         value = str(song.get(field, "")).lower()
-        if value and value in q:
+        if value and q in value:
             filtered.append(song)
 
     return filtered
